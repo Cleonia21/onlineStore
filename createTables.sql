@@ -1,3 +1,12 @@
+CREATE TABLE Orders
+(
+    Id SERIAL PRIMARY KEY,
+    Number INTEGER NOT NULL,
+    ProductId INTEGER,
+    Quantity INTEGER NOT NULL,
+    FOREIGN KEY (ProductId) REFERENCES Products (Id)
+);
+
 CREATE TABLE Products
 (
     Id SERIAL PRIMARY KEY,
@@ -10,15 +19,6 @@ CREATE TABLE Shelving
 (
     Id SERIAL PRIMARY KEY,
     Name CHARACTER(1) NOT NULL
-);
-
-CREATE TABLE Orders
-(
-    Id SERIAL PRIMARY KEY,
-    Number INTEGER NOT NULL,
-    ProductId INTEGER,
-    Quantity INTEGER NOT NULL,
-    FOREIGN KEY (ProductId) REFERENCES Products (Id)
 );
 
 CREATE TABLE ProductsOnTheShelving
