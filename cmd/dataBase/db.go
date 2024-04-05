@@ -1,4 +1,4 @@
-package main
+package dataBase
 
 import (
 	"database/sql"
@@ -7,16 +7,16 @@ import (
 	"os"
 )
 
-type dataBase struct {
+type DataBase struct {
 	db *sql.DB
 }
 
-func (db *dataBase) ConnectDB() {
+func (db *DataBase) ConnectDB() {
 	var err error
 	db.db, err = sql.Open("postgres", connectString())
 
 	if err != nil {
-		fmt.Errorf("Failed to connect to database. \n", err)
+		fmt.Errorf("failed to connect to database err=%v\n", err.Error())
 		os.Exit(2)
 	}
 	//fmt.Println("data base connected")
@@ -32,7 +32,7 @@ func connectString() string {
 	return connStr
 }
 
-func (db *dataBase) Close() error {
+func (db *DataBase) Close() error {
 	err := db.db.Close()
 	return err
 }

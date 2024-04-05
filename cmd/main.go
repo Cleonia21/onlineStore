@@ -2,16 +2,17 @@ package main
 
 import (
 	"fmt"
+	"main/dataBase"
 )
 
 func main() {
 	ordersNum := []int{10, 11, 14, 15}
 
-	db := dataBase{}
+	db := dataBase.DataBase{}
 	db.ConnectDB()
 	defer db.Close()
 
-	err, orders := db.getShelving(ordersNum)
+	err, orders := db.GetShelving(ordersNum)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -20,10 +21,10 @@ func main() {
 	myPrint(ordersNum, sortByShelving(orders))
 }
 
-func sortByShelving(orders []order) map[string][]order {
-	sortMap := make(map[string][]order)
+func sortByShelving(orders []dataBase.Order) map[string][]dataBase.Order {
+	sortMap := make(map[string][]dataBase.Order)
 	for _, o := range orders {
-		sortMap[o.mainShelf] = append(sortMap[o.mainShelf], o)
+		sortMap[o.MainShelf] = append(sortMap[o.MainShelf], o)
 	}
 	return sortMap
 }
