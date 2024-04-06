@@ -40,7 +40,7 @@ func Test_dataBase_getShelving(t *testing.T) {
 					return
 				}
 			}
-			gotErr, _ := db.GetOrders(tt.args.ordersNum)
+			_, gotErr := db.GetOrders(tt.args.ordersNum)
 			if !reflect.DeepEqual(gotErr, tt.wantErr) {
 				t.Errorf("getShelving() gotErr = %v, want %v", gotErr, tt.wantErr)
 			}

@@ -1,6 +1,7 @@
 package dataBase
 
 import (
+	"errors"
 	"fmt"
 	"github.com/lib/pq"
 	"main/utils"
@@ -15,7 +16,7 @@ type Order struct {
 	OptionalShelf []string
 }
 
-func (db *DataBase) GetOrders(ordersNum []int) (err error, orders []Order) {
+func (db *DataBase) GetOrders(ordersNum []int) (orders []Order, err error) {
 	q := `
 		SELECT
 			o.Number,
@@ -36,7 +37,7 @@ func (db *DataBase) GetOrders(ordersNum []int) (err error, orders []Order) {
 
 	rows, err := db.db.Query(q)
 	if err != nil {
-		return fmt.Errorf("getShelving() %v", err.Error()), nil
+		return nil, fmt.Errorf("getShelving() %v", err.Error())
 	}
 	defer rows.Close()
 
@@ -54,6 +55,9 @@ func (db *DataBase) GetOrders(ordersNum []int) (err error, orders []Order) {
 			return
 		}
 		orders = append(orders, o)
+	}
+	if len(orders) == 0 {
+		return nil, errors.New("заказы не найдены")
 	}
 	return
 }

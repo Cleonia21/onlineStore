@@ -24,7 +24,7 @@ func main() {
 	}
 	defer db.Close()
 
-	err, orders := db.GetOrders(ordersNum)
+	orders, err := db.GetOrders(ordersNum)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -57,7 +57,7 @@ func parseArgv() ([]int, error) {
 }
 
 // sortByShelving сортирует массив заказов по полкам и
-// возвращает map, где ключ стеллаж, а значение массив заказов с этого стелажа
+// возвращает map, где ключ стеллаж, а значение - массив заказов с этого стелажа
 func sortByShelving(orders []dataBase.Order) map[string][]dataBase.Order {
 	sortMap := make(map[string][]dataBase.Order)
 	for _, o := range orders {

@@ -23,8 +23,8 @@ func (db *DataBase) ConnectDB() error {
 }
 
 // connectString возвращает строку подключения к базе данных
-func connectString() string {
-	connStr := fmt.Sprintf("postgres://%v:%v@%v:5432/%v?sslmode=disable",
+func connectString() (connStr string) {
+	connStr = fmt.Sprintf("postgres://%v:%v@%v:5432/%v?sslmode=disable",
 		"postgres",
 		"2222",
 		"localhost",
