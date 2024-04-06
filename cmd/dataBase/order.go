@@ -15,7 +15,7 @@ type Order struct {
 	OptionalShelf []string
 }
 
-func (db *DataBase) GetShelving(ordersNum []int) (err error, orders []Order) {
+func (db *DataBase) GetOrders(ordersNum []int) (err error, orders []Order) {
 	q := `
 		SELECT
 			o.Number,
@@ -29,10 +29,10 @@ func (db *DataBase) GetShelving(ordersNum []int) (err error, orders []Order) {
 				 JOIN shelving s1 ON p.shelfId = s1.id
 				 LEFT JOIN optionalShelving os ON p.id = os.ProductId
 				 LEFT JOIN shelving s2 ON os.shelfId = s2.id
-		WHERE o.Number IN %v
+		WHERE o.Number IN (%v)
 		GROUP BY o.Number, o.Quantity, p.name, p.id, s1.name
 		`
-	q = fmt.Sprintf(q, "("+utils.IntToStrJoin(ordersNum, ", ")+")")
+	q = fmt.Sprintf(q, utils.IntToStrJoin(ordersNum, ", "))
 
 	rows, err := db.db.Query(q)
 	if err != nil {

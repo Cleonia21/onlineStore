@@ -1,37 +1,46 @@
 package dataBase
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 )
 
 func Test_dataBase_getShelving(t *testing.T) {
 	db := DataBase{}
-	db.ConnectDB()
+	err := db.ConnectDB()
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
 	defer db.Close()
-
-	//err := fillDB(&db)
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
 
 	type args struct {
 		ordersNum []int
 	}
 	tests := []struct {
-		name    string
-		args    args
-		wantErr error
+		name     string
+		args     args
+		wantErr  error
+		reFillDb bool
 	}{
 		{
-			name:    "",
-			args:    args{ordersNum: []int{12344}},
-			wantErr: nil,
+			name:     "",
+			args:     args{ordersNum: []int{10, 11, 14, 15}},
+			wantErr:  nil,
+			reFillDb: true,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotErr, _ := db.GetShelving(tt.args.ordersNum)
+			if tt.reFillDb {
+				err = fillDb(&db, 1000)
+				if err != nil {
+					fmt.Println(err)
+					return
+				}
+			}
+			gotErr, _ := db.GetOrders(tt.args.ordersNum)
 			if !reflect.DeepEqual(gotErr, tt.wantErr) {
 				t.Errorf("getShelving() gotErr = %v, want %v", gotErr, tt.wantErr)
 			}

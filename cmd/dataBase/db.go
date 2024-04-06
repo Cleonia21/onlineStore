@@ -4,24 +4,25 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/lib/pq"
-	"os"
 )
 
 type DataBase struct {
 	db *sql.DB
 }
 
-func (db *DataBase) ConnectDB() {
+// ConnectDB осуществляет подключение к базе данных
+func (db *DataBase) ConnectDB() error {
 	var err error
 	db.db, err = sql.Open("postgres", connectString())
 
 	if err != nil {
-		fmt.Errorf("failed to connect to database err=%v\n", err.Error())
-		os.Exit(2)
+		return fmt.Errorf("failed to connect to database: %v\n", err.Error())
 	}
 	//fmt.Println("data base connected")
+	return nil
 }
 
+// connectString возвращает строку подключения к базе данных
 func connectString() string {
 	connStr := fmt.Sprintf("postgres://%v:%v@%v:5432/%v?sslmode=disable",
 		"postgres",
@@ -32,6 +33,7 @@ func connectString() string {
 	return connStr
 }
 
+// Close закрывает подключение к базе данных
 func (db *DataBase) Close() error {
 	err := db.db.Close()
 	return err

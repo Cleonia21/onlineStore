@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func myPrint(ordersNum []int, mapByShelving map[string][]dataBase.Order) {
+func printOrders(ordersNum []int, mapByShelving map[string][]dataBase.Order) {
 	fmt.Printf(
 		"=+=+=+=\nСтраница сборки заказов %v\n",
 		utils.IntToStrJoin(ordersNum, ","),

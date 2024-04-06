@@ -30,3 +30,12 @@ VALUES
     (5, 14, 4, 4),
     (6, 15, 5, 1),
     (7, 10, 6, 1);
+
+ALTER SEQUENCE orders_id_seq RESTART WITH 1;
+delete from orders *;
+ALTER SEQUENCE optionalShelving_id_seq RESTART WITH 1;
+delete from optionalShelving *;
+ALTER SEQUENCE products_id_seq RESTART WITH 1;
+delete from products *;
+ALTER SEQUENCE shelving_id_seq RESTART WITH 1;
+delete from shelving *;
