@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"main/dataBase"
-	"main/utils"
+	"onlineStore/dataBase"
+	"onlineStore/utils"
 	"strings"
 )
 

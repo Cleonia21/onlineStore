@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
-	"main/dataBase"
+	"onlineStore/dataBase"
 	"os"
 	"strconv"
 	"strings"
