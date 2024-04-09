@@ -1,6 +1,6 @@
 package usecase
 
-import "onlineStore/domain"
+import "onlineStore/src/domain"
 
 type UserInteractor struct {
 	UserRepository UserRepository

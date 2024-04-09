@@ -1,6 +1,6 @@
 package database
 
-import "onlineStore/domain"
+import "onlineStore/src/domain"
 
 type UserRepository struct {
 	SqlHandler

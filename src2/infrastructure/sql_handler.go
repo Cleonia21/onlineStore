@@ -3,14 +3,13 @@ package infrastructure
 import (
 	"database/sql"
 	"fmt"
-	"onlineStore/src/interfaces/database"
 )
 
 type SqlHandler struct {
 	db *sql.DB
 }
 
-func NewSqlHandler() database.SqlHandler {
+func NewSqlHandler() *SqlHandler {
 	connStr := fmt.Sprintf("postgres://%v:%v@%v:5432/%v?sslmode=disable",
 		"postgres",
 		"2222",
@@ -26,14 +25,6 @@ func NewSqlHandler() database.SqlHandler {
 	return sqlHandler
 }
 
-func (handler *SqlHandler) Create(obj interface{}) {
-	handler.db.Create(obj)
-}
-
-func (handler *SqlHandler) FindAll(obj interface{}) {
-	handler.db.Find(obj)
-}
-
-func (handler *SqlHandler) DeleteById(obj interface{}, id string) {
-	handler.db.Delete(obj, id)
+func (handler *SqlHandler) FindSome(id int) string {
+	return ""
 }
