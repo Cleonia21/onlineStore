@@ -3,14 +3,14 @@ package entities
 type Shelf struct {
 	Id   int
 	Name string
-	Main bool
 }
 
 type Product struct {
-	Id       int
-	Name     string
-	Quantity int
-	Shelving []Shelf
+	Id               int
+	Name             string
+	Quantity         int
+	Shelf            Shelf
+	OptionalShelving []Shelf
 }
 
 type Order struct {

@@ -3,9 +3,9 @@ package infrastructure
 import (
 	"database/sql"
 	"fmt"
-	"onlineStore/src2/interfaces/database"
-	"strconv"
-	"strings"
+	_ "github.com/lib/pq"
+	"onlineStore/internal/interfaces/database"
+	"onlineStore/utils"
 )
 
 type SqlHandler struct {
@@ -29,7 +29,7 @@ func NewSqlHandler() *SqlHandler {
 }
 
 func (handler *SqlHandler) GetOrders(id int) ([]database.Order, error) {
-	q := `SELECT (productId, quantity) FROM orders WHERE number = %v`
+	q := `SELECT productId, quantity FROM orders WHERE number = %v`
 	q = fmt.Sprintf(q, id)
 
 	rows, err := handler.db.Query(q)
@@ -51,8 +51,8 @@ func (handler *SqlHandler) GetOrders(id int) ([]database.Order, error) {
 }
 
 func (handler *SqlHandler) GetProducts(id []int) ([]database.Product, error) {
-	q := `SELECT (id, name, shelfId) FROM products WHERE id IN (%v)`
-	q = fmt.Sprintf(q, intToStrJoin(id, ","))
+	q := `SELECT id, name, shelfId FROM products WHERE id IN (%v)`
+	q = fmt.Sprintf(q, utils.IntToStrJoin(id, ","))
 
 	rows, err := handler.db.Query(q)
 	if err != nil {
@@ -73,8 +73,8 @@ func (handler *SqlHandler) GetProducts(id []int) ([]database.Product, error) {
 }
 
 func (handler *SqlHandler) GetShelving(id []int) ([]database.Shelf, error) {
-	q := `SELECT (id, name) FROM shelving WHERE id IN (%v)`
-	q = fmt.Sprintf(q, intToStrJoin(id, ","))
+	q := `SELECT id, name FROM shelving WHERE id IN (%v)`
+	q = fmt.Sprintf(q, utils.IntToStrJoin(id, ","))
 
 	rows, err := handler.db.Query(q)
 	if err != nil {
@@ -95,8 +95,8 @@ func (handler *SqlHandler) GetShelving(id []int) ([]database.Shelf, error) {
 }
 
 func (handler *SqlHandler) GetOptionalShelving(ProductId []int) ([]database.OptionalShelving, error) {
-	q := `SELECT (productId, shelfId) FROM optionalShelving WHERE productId IN (%v)`
-	q = fmt.Sprintf(q, intToStrJoin(ProductId, ","))
+	q := `SELECT productId, shelfId FROM optionalShelving WHERE productId IN (%v)`
+	q = fmt.Sprintf(q, utils.IntToStrJoin(ProductId, ","))
 
 	rows, err := handler.db.Query(q)
 	if err != nil {
@@ -114,12 +114,4 @@ func (handler *SqlHandler) GetOptionalShelving(ProductId []int) ([]database.Opti
 		optionalShelving = append(optionalShelving, optionalShelf)
 	}
 	return optionalShelving, err
-}
-
-func intToStrJoin(ordersNum []int, sep string) string {
-	var strs []string
-	for _, i := range ordersNum {
-		strs = append(strs, strconv.Itoa(i))
-	}
-	return strings.Join(strs, sep)
 }

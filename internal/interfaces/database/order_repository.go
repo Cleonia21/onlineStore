@@ -1,7 +1,7 @@
 package database
 
 import (
-	"onlineStore/src2/entities"
+	"onlineStore/internal/entities"
 )
 
 type OrderRepository struct {
@@ -41,26 +41,38 @@ func initParser() parser {
 	return p
 }
 
-func (or *OrderRepository) Select(number int) entities.Order {
+func (or *OrderRepository) SelectOrder(number int) (entities.Order, error) {
 	advancedOrder := entities.Order{}
 	advancedOrder.Number = number
 
 	p := initParser()
 
-	orders := or.GetOrders(number)
+	orders, err := or.GetOrders(number)
+	if err != nil {
+		return advancedOrder, err
+	}
 	p.saveOrders(orders)
 
-	products := or.GetProducts(keys(p.productsMap))
+	products, err := or.GetProducts(keys(p.productsMap))
+	if err != nil {
+		return advancedOrder, err
+	}
 	p.saveProducts(products)
 
-	optionalShelving := or.GetOptionalShelving(keys(p.productsMap))
+	optionalShelving, err := or.GetOptionalShelving(keys(p.productsMap))
+	if err != nil {
+		return advancedOrder, err
+	}
 	p.saveOptShelving(optionalShelving)
 
-	shelving := or.GetShelving(keys(p.shelvingMap))
+	shelving, err := or.GetShelving(keys(p.shelvingMap))
+	if err != nil {
+		return advancedOrder, err
+	}
 	p.saveShelving(shelving)
 
 	advancedOrder.Products = p.parseData()
-	return advancedOrder
+	return advancedOrder, nil
 }
 
 func (s *parser) saveOrders(orders []Order) {
@@ -74,16 +86,16 @@ func (s *parser) saveProducts(products []Product) {
 	for _, product := range products {
 		p := s.productsMap[product.Id]
 		p.Name = product.Name
-		p.Shelving = append(p.Shelving, entities.Shelf{Id: product.ShelfId, Main: true})
-		s.shelvingMap[product.ShelfId] = entities.Shelf{Id: product.ShelfId, Name: ""}
+		p.Shelf.Id = product.ShelfId
+		s.shelvingMap[product.ShelfId] = entities.Shelf{Id: product.ShelfId}
 	}
 }
 
 func (s *parser) saveOptShelving(optionalShelving []OptionalShelving) {
 	for _, optionalShelf := range optionalShelving {
 		p := s.productsMap[optionalShelf.ProductId]
-		p.Shelving = append(p.Shelving, entities.Shelf{Id: optionalShelf.ShelfId})
-		s.shelvingMap[optionalShelf.ShelfId] = entities.Shelf{Id: optionalShelf.ShelfId, Name: ""}
+		p.OptionalShelving = append(p.OptionalShelving, entities.Shelf{Id: optionalShelf.ShelfId})
+		s.shelvingMap[optionalShelf.ShelfId] = entities.Shelf{Id: optionalShelf.ShelfId}
 	}
 }
 
@@ -95,9 +107,10 @@ func (s *parser) saveShelving(shelving []Shelf) {
 
 func (s *parser) parseData() (products []entities.Product) {
 	for _, product := range s.productsMap {
-		for i, shelf := range product.Shelving {
-			product.Shelving[i].Name = s.shelvingMap[shelf.Id].Name
+		for i, shelf := range product.OptionalShelving {
+			product.OptionalShelving[i].Name = s.shelvingMap[shelf.Id].Name
 		}
+		product.Shelf.Name = s.shelvingMap[product.Shelf.Id].Name
 		products = append(products, product)
 	}
 	return
