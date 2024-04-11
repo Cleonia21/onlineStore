@@ -3,87 +3,182 @@ package database
 import (
 	"onlineStore/internal/entities"
 	"reflect"
+	"sort"
 	"testing"
 )
 
-func Test_keys(t *testing.T) {
-	type args[T any] struct {
-		m map[int]T
-	}
-	type testCase[T any] struct {
-		name     string
-		args     args[T]
-		wantKeys []int
-	}
-	tests := []testCase[int]{
+type repo1 struct{}
+
+func (r repo1) GetOrders(id int) ([]Order, error) {
+	_ = id
+	return []Order{
 		{
-			name: "",
-			args: args[int]{
-				m: map[int]int{
-					1: 23423,
-					2: 2432,
-					3: 14213,
-				},
-			},
-			wantKeys: []int{1, 2, 3},
+			ProductId: 1,
+			Quantity:  2,
 		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if gotKeys := keys(tt.args.m); !reflect.DeepEqual(gotKeys, tt.wantKeys) {
-				t.Errorf("keys() = %v, want %v", gotKeys, tt.wantKeys)
-			}
-		})
-	}
+		{
+			ProductId: 3,
+			Quantity:  1,
+		},
+		{
+			ProductId: 6,
+			Quantity:  1,
+		},
+	}, nil
 }
 
-func Test_parser_saveShelving(t *testing.T) {
-	type args struct {
-		shelving []Shelf
+func (r repo1) GetProducts(id []int) ([]Product, error) {
+	_ = id
+	return []Product{
+		{
+			Id:      1,
+			Name:    "Ноутбук",
+			ShelfId: 1, // А
+		},
+		{
+			Id:      3,
+			Name:    "Телефон",
+			ShelfId: 2, // Б
+		},
+		{
+			Id:      6,
+			Name:    "Микрофон",
+			ShelfId: 4, // Ж
+		},
+	}, nil
+}
+
+func (r repo1) GetShelving(id []int) ([]Shelf, error) {
+	_ = id
+	return []Shelf{
+		{
+			Id:   1,
+			Name: "А",
+		},
+		{
+			Id:   2,
+			Name: "Б",
+		},
+		{
+			Id:   3,
+			Name: "В",
+		},
+		{
+			Id:   4,
+			Name: "Ж",
+		},
+		{
+			Id:   5,
+			Name: "З",
+		},
+	}, nil
+}
+
+func (r repo1) GetOptionalShelving(ProductId []int) ([]OptionalShelving, error) {
+	_ = ProductId
+	return []OptionalShelving{
+		{
+			ProductId: 3,
+			ShelfId:   3,
+		},
+		{
+			ProductId: 3,
+			ShelfId:   5,
+		},
+	}, nil
+}
+
+func TestOrderRepository_SelectOrder(t *testing.T) {
+	type fields struct {
+		SqlHandler SqlHandler
 	}
-	type want struct {
-		m map[int]entities.Shelf
+	type args struct {
+		number int
 	}
 	tests := []struct {
-		name string
-		args args
-		want want
+		name    string
+		fields  fields
+		args    args
+		want    entities.Order
+		wantErr bool
 	}{
 		{
 			name: "",
-			args: args{shelving: []Shelf{
-				{
-					Id:   1,
-					Name: "1",
+			fields: fields{
+				SqlHandler: repo1{},
+			},
+			args: args{number: 1},
+			want: entities.Order{
+				Number: 1,
+				Products: []entities.Product{
+					{
+						Id:       1,
+						Name:     "Ноутбук",
+						Quantity: 2,
+						Shelf: entities.Shelf{
+							Id:   1,
+							Name: "А",
+						},
+						OptionalShelving: nil,
+					},
+					{
+						Id:       3,
+						Name:     "Телефон",
+						Quantity: 1,
+						Shelf: entities.Shelf{
+							Id:   2,
+							Name: "Б",
+						},
+						OptionalShelving: []entities.Shelf{
+							{
+								Id:   3,
+								Name: "В",
+							},
+							{
+								Id:   5,
+								Name: "З",
+							},
+						},
+					},
+					{
+						Id:       6,
+						Name:     "Микрофон",
+						Quantity: 1,
+						Shelf: entities.Shelf{
+							Id:   4,
+							Name: "Ж",
+						},
+						OptionalShelving: nil,
+					},
 				},
-				{
-					Id:   123,
-					Name: "123",
-				},
-			}},
-			want: want{m: map[int]entities.Shelf{
-				1: {
-					Id:   1,
-					Name: "1",
-				},
-				123: {
-					Id:   123,
-					Name: "123",
-				},
-			}},
-		},
-		{
-			name: "",
-			args: args{nil},
-			want: want{m: map[int]entities.Shelf{}},
+			},
+			wantErr: false,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			s := initParser()
-			s.saveShelving(tt.args.shelving)
-			if !reflect.DeepEqual(s.shelvingMap, tt.want.m) {
-				t.Errorf("shelvingMap() = %v, want %v", s.shelvingMap, tt.want.m)
+			or := &OrderRepository{
+				SqlHandler: tt.fields.SqlHandler,
+			}
+			got, err := or.SelectOrder(tt.args.number)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("SelectOrder() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			sort.Slice(got.Products, func(i, j int) bool {
+				return got.Products[i].Id < got.Products[j].Id
+			})
+
+			for key, val := range got.Products {
+				sort.Slice(val.OptionalShelving, func(i, j int) bool {
+					return val.OptionalShelving[i].Id < val.OptionalShelving[j].Id
+				})
+				got.Products[key] = val
+			}
+
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("SelectOrder() got = \n%#v\n, want \n%#v", got, tt.want)
 			}
 		})
 	}

@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"errors"
 	"onlineStore/internal/entities"
 	"onlineStore/internal/interfaces/database"
 	"onlineStore/internal/usecase"
@@ -31,19 +32,17 @@ type Order struct {
 
 func (controller *OrderController) GetOrders(ids []int) (map[string][]Order, error) {
 	entOrders, err := controller.collectOrders(ids)
-	if err != nil {
-		return nil, err
-	}
 	orders := convertOrders(entOrders)
 	orderSortMap := sortOrdersByShelving(orders)
-	return orderSortMap, nil
+	return orderSortMap, err
 }
 
 func (controller *OrderController) collectOrders(ids []int) (orders []entities.Order, err error) {
 	for _, id := range ids {
-		order, err := controller.Interactor.GetOrder(id)
-		if err != nil {
-			return nil, err
+		order, e := controller.Interactor.GetOrder(id)
+		if e != nil {
+			err = errors.Join(err, e)
+			continue
 		}
 		orders = append(orders, order)
 	}
@@ -64,6 +63,7 @@ func convertOrders(entOrders []entities.Order) (orders []Order) {
 			for _, entShelf := range entProduct.OptionalShelving {
 				order.OptionalShelf = append(order.OptionalShelf, entShelf.Name)
 			}
+			orders = append(orders, order)
 		}
 	}
 	return orders

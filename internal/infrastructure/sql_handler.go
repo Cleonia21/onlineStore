@@ -2,6 +2,7 @@ package infrastructure
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	_ "github.com/lib/pq"
 	"onlineStore/internal/interfaces/database"
@@ -28,9 +29,9 @@ func NewSqlHandler() *SqlHandler {
 	return sqlHandler
 }
 
-func (handler *SqlHandler) GetOrders(id int) ([]database.Order, error) {
+func (handler *SqlHandler) GetOrders(number int) ([]database.Order, error) {
 	q := `SELECT productId, quantity FROM orders WHERE number = %v`
-	q = fmt.Sprintf(q, id)
+	q = fmt.Sprintf(q, number)
 
 	rows, err := handler.db.Query(q)
 	if err != nil {
@@ -39,6 +40,7 @@ func (handler *SqlHandler) GetOrders(id int) ([]database.Order, error) {
 	defer rows.Close()
 
 	var orders []database.Order
+	err = errors.New("order not found")
 	for rows.Next() {
 		var order database.Order
 		err = rows.Scan(&order.ProductId, &order.Quantity)
@@ -61,6 +63,7 @@ func (handler *SqlHandler) GetProducts(id []int) ([]database.Product, error) {
 	defer rows.Close()
 
 	var products []database.Product
+	err = errors.New("product not found")
 	for rows.Next() {
 		var product database.Product
 		err = rows.Scan(&product.Id, &product.Name, &product.ShelfId)
@@ -83,6 +86,7 @@ func (handler *SqlHandler) GetShelving(id []int) ([]database.Shelf, error) {
 	defer rows.Close()
 
 	var shelving []database.Shelf
+	err = errors.New("shelving not found")
 	for rows.Next() {
 		var shelf database.Shelf
 		err = rows.Scan(&shelf.Id, &shelf.Name)

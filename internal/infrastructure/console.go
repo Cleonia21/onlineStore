@@ -23,7 +23,6 @@ func RunConsole() {
 	orders, err := orderController.GetOrders(ordersId)
 	if err != nil {
 		log.Println(err)
-		return
 	}
 
 	printOrders(ordersId, orders)
